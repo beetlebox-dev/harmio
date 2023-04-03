@@ -223,11 +223,13 @@ function resizeWindowDelay () {
 function resizeWindow () {
 
     let flipToSide = false;
-    let xLength = window.innerWidth;
+    const containerWidth = document.body.clientWidth;
+    console.log(containerWidth)
+    let xLength = containerWidth;
     if (screen.orientation !== undefined) {
         if (screen.orientation.type === 'portrait' || screen.orientation.type === 'portrait-primary' || screen.orientation.type === 'portrait-secondary') {
             flipToSide = true;
-            xLength = Math.max(window.innerHeight, window.innerWidth);
+            xLength = Math.max(window.innerHeight, containerWidth);
         };
     };
 
@@ -256,9 +258,9 @@ function resizeWindow () {
     bodyContainer.style.padding = `${xLength * 0.03}px`;
     bodyContainer.style.width = `${xLength}px`;
     bodyContainer.style.top = `${window.innerHeight / 2}px`;
-    bodyContainer.style.left = `${window.innerWidth / 2}px`;
+    bodyContainer.style.left = `${containerWidth / 2}px`;
     let translateY = Math.min(0.5, window.innerHeight / (bodyContainer.offsetHeight * 2)) * -100;
-    if (flipToSide && window.innerHeight > window.innerWidth) {
+    if (flipToSide && window.innerHeight > containerWidth) {
         bodyContainer.style.transform = `translate(-50%, ${translateY}%) rotate(90deg)`;
     } else {
         bodyContainer.style.transform = `translate(-50%, ${translateY}%)`;
