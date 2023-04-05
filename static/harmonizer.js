@@ -7,6 +7,7 @@ const bodyContainer = document.querySelector('#body-container');
 const keyboard = document.querySelector('#keyboard');
 const keyboardKeys = document.querySelectorAll('.black-key, .white-key, .non-key');
 const keyboardActualKeysOnly = document.querySelectorAll('.black-key, .white-key');
+const panel = document.querySelector('div#panel');
 const harmDirectionButton = document.querySelector('#harmony-direction');
 const brightButton = document.querySelector('#harmony-direction-bright');
 const darkButton = document.querySelector('#harmony-direction-dark');
@@ -14,7 +15,12 @@ const chordSymbolContainer = document.querySelector('.chord-symbol');
 const chordSymbolA = document.querySelector('.chord-symbol-a');
 const chordSymbolB = document.querySelector('.chord-symbol-b');
 const chordSymbolC = document.querySelector('.chord-symbol-c');
+const rotateButton = document.querySelector('#rotate-button');
 
+// Init orientation.
+let stateFlipped = window.innerWidth / window.innerHeight >= 1;
+let lastWindowPreferFlip = window.innerWidth / window.innerHeight < 1;
+rotateView();
 
 // Audio settings
 const envAttackTime = 0.1;  // seconds
@@ -65,7 +71,6 @@ var absLastTonalCenter = randInt(0, 11);  // Initialized randomly.
 var lastHarmonyGroupKey;
 var repeatTonalCenterCount = 0;
 var repeatHarmonyGroupCount = 0;
-var resizeLagTimeoutId;
 
 // Color variables
 const startHue = 150;
@@ -84,7 +89,8 @@ var nextAlertMsec = null;
 
 
 // Add event listeners
-window.addEventListener('resize', resizeWindowDelay);
+rotateButton.addEventListener('click', rotateView);
+window.addEventListener('resize', windowResizeEvent);
 window.addEventListener('mouseup', () => {
     mouseOrTouchOn = false;
     oscillatorUntrigger();
@@ -158,15 +164,81 @@ for (let key of keyboardKeys) {
 };
 
 
-// Init styling.
+// Init CSS.
 updateColoring(startHue);
 allKeysOff();  // Init key colors.
 document.body.style.backgroundColor = bodyBgColor;
 chordSymbolContainer.style.color = blackKeyTriggerableOffColor;
 darkButton.style.color = 'black';
 brightButton.style.color = 'white';
-resizeWindowDelay();  // Init sizing.
 
+
+function windowResizeEvent() {
+
+    const aspectRatio = window.innerWidth / window.innerHeight;
+    const stickyAspRatioAmount = 0.1;
+
+    if (lastWindowPreferFlip) {
+        if (aspectRatio > 1 + stickyAspRatioAmount) {
+            // This window does not prefer flip.
+            lastWindowPreferFlip = false;
+            if (stateFlipped) {
+                rotateView();
+            };
+        };
+
+    } else if (aspectRatio < 1 - stickyAspRatioAmount) {
+        // This window does prefer flip.
+        // lastWindowPreferFlip === false
+        lastWindowPreferFlip = true;
+        if (stateFlipped === false) {
+            rotateView();
+        };
+    };
+};
+
+function rotateView() {
+
+    stateFlipped = stateFlipped === false;  // Flip boolean.
+
+    let unit;
+    if (stateFlipped) {
+        unit = 'vh';
+        document.getElementById('body-container').style.transform = 'rotate(90deg)';
+        document.getElementById('rotate-button').style.transform = 'scaleY(-1)';
+
+    } else {
+        unit = 'vw';
+        document.getElementById('body-container').style.transform = 'none';
+        document.getElementById('rotate-button').style.transform = 'none';
+    };
+
+    bodyContainer.style.padding = `3${unit}`;
+    bodyContainer.style.width = `100${unit}`;
+
+    keyboard.style.height = `18${unit}`;
+
+    for (const key of keyboardKeys) {
+        key.style.borderWidth = `0.2${unit}`;
+        key.style.borderRadius = `1${unit}`;
+    };
+
+    panel.style.marginTop = `2${unit}`;
+
+    harmDirectionButton.style.width = `14${unit}`;
+    brightButton.style.fontSize = `1.8${unit}`;
+    darkButton.style.fontSize = `1.8${unit}`;
+    brightButton.style.padding = `1${unit} 0`;
+    darkButton.style.padding = `1${unit} 0`;
+    brightButton.style.borderRadius = `2${unit} 0 0 0`;
+    darkButton.style.borderRadius = `0 0 2${unit} 0`;
+
+    chordSymbolA.style.fontSize = `6${unit}`;
+    chordSymbolB.style.fontSize = `4.5${unit}`;
+    chordSymbolC.style.fontSize = `3${unit}`;
+
+    rotateButton.style.height = `5${unit}`;
+};
 
 function mouseEnterTriggerableKey (event) {
     lastActiveKey = event.target.id.slice(4);
@@ -210,60 +282,6 @@ function updateColoring (newMainHue) {
 
     for (key of keyboardKeys) {
         key.style.borderColor = bodyBgColor;
-    };
-};
-
-function resizeWindowDelay () {
-    // Resizes window again after delay to account for lag (debugged for iPhone 7).
-    clearTimeout(resizeLagTimeoutId);
-    resizeWindow();
-    resizeLagTimeoutId = setTimeout(function() { resizeWindow(); }, 400);
-};
-
-function resizeWindow () {
-
-    let flipToSide = false;
-    const containerWidth = document.body.clientWidth;
-    console.log(containerWidth)
-    let xLength = containerWidth;
-    if (screen.orientation !== undefined) {
-        if (screen.orientation.type === 'portrait' || screen.orientation.type === 'portrait-primary' || screen.orientation.type === 'portrait-secondary') {
-            flipToSide = true;
-            xLength = Math.max(window.innerHeight, containerWidth);
-        };
-    };
-
-    keyboard.style.height = `${xLength * 0.18}px`;
-
-    for (key of keyboardKeys) {
-        key.style.borderWidth = `${xLength * 0.002}px`;
-        key.style.borderRadius = `${xLength * 0.01}px`;
-    };
-
-    harmDirectionButton.style.width = `${xLength * 0.14}px`;
-    brightButton.style.fontSize = `${xLength * 0.018}px`;
-    darkButton.style.fontSize = `${xLength * 0.018}px`;
-    brightButton.style.padding = `${xLength * 0.01}px 0`;
-    darkButton.style.padding = `${xLength * 0.01}px 0`;
-    brightButton.style.borderRadius = `${xLength * 0.02}px 0 0 0`;
-    darkButton.style.borderRadius = `0 0 ${xLength * 0.02}px 0`;
-
-    chordSymbolContainer.style.height = `${xLength * 0.07}px`;
-    chordSymbolContainer.style.lineHeight = `${xLength * 0.07}px`;
-    chordSymbolContainer.style.margin = `${xLength * 0.03}px auto`;
-    chordSymbolA.style.fontSize = `${xLength * 0.06}px`;
-    chordSymbolB.style.fontSize = `${xLength * 0.045}px`;
-    chordSymbolC.style.fontSize = `${xLength * 0.03}px`;
-
-    bodyContainer.style.padding = `${xLength * 0.03}px`;
-    bodyContainer.style.width = `${xLength}px`;
-    bodyContainer.style.top = `${window.innerHeight / 2}px`;
-    bodyContainer.style.left = `${containerWidth / 2}px`;
-    let translateY = Math.min(0.5, window.innerHeight / (bodyContainer.offsetHeight * 2)) * -100;
-    if (flipToSide && window.innerHeight > containerWidth) {
-        bodyContainer.style.transform = `translate(-50%, ${translateY}%) rotate(90deg)`;
-    } else {
-        bodyContainer.style.transform = `translate(-50%, ${translateY}%)`;
     };
 };
 

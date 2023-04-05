@@ -13,10 +13,18 @@
 
         body {
             margin: 0;
+
+            /* Minimum window height with vertical center. */
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
         }
 
         #body-container {
-            position: absolute;
+            transition: transform 0.3s ease-out;
             box-sizing: border-box;
             margin: 0;
         }
@@ -45,12 +53,14 @@
         }
 
         div#panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
         }
 
         div#harmony-direction {
             display: inline;
-            position: absolute;
         }
         div#harmony-direction-bright, div#harmony-direction-dark {
             font-family: Futura, "Century Gothic", sans-serif;
@@ -69,6 +79,14 @@
         }
         .chord-symbol-c {
             vertical-align: 25%;
+        }
+
+        #rotate-button {
+            right: 0;
+            opacity: 50%;
+        }
+        #rotate-button:hover {
+            opacity: 100%;
         }
 
     </style>
@@ -161,6 +179,8 @@
             <div class="chord-symbol">
                 <h1><span class="chord-symbol-a">C</span><span class="chord-symbol-b">hord</span><span class="chord-symbol-c"><sup>symbol</sup></span></h1>
             </div>
+
+            <img id="rotate-button" src="/static/clockwise-arrow.png" alt="">
 
         </div>
 
