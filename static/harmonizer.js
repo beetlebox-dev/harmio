@@ -18,8 +18,8 @@ const chordSymbolC = document.querySelector('.chord-symbol-c');
 const rotateButton = document.querySelector('#rotate-button');
 
 // Init orientation.
-let stateFlipped = window.innerWidth / window.innerHeight >= 1;
 let lastWindowPreferFlip = window.innerWidth / window.innerHeight < 1;
+let stateFlipped = lastWindowPreferFlip === false;  // Boolean flipped back to match lastWindowPreferFlip in rotateView() on init.
 rotateView();
 
 // Audio settings
@@ -60,7 +60,6 @@ var harmonies;
 fetch('/static/harmonies.json')
 .then((response) => response.json())
 .then((data) => harmonies = data);
-//$.getJSON('/static/harmonies.json', function(data) { harmonies = data; });
 
 // Initialize variables
 var modulationDirection = -1;  // Brighter (add sharps) is -1. Darker (add flats) is 1.
@@ -201,43 +200,46 @@ function rotateView() {
 
     stateFlipped = stateFlipped === false;  // Flip boolean.
 
-    let unit;
     if (stateFlipped) {
-        unit = 'vh';
         document.getElementById('body-container').style.transform = 'rotate(90deg)';
         document.getElementById('rotate-button').style.transform = 'scaleY(-1)';
 
     } else {
-        unit = 'vw';
         document.getElementById('body-container').style.transform = 'none';
         document.getElementById('rotate-button').style.transform = 'none';
     };
 
-    bodyContainer.style.padding = `3${unit}`;
-    bodyContainer.style.width = `100${unit}`;
+    bodyContainer.style.padding = flipDependentLength(3);
+    bodyContainer.style.width = flipDependentLength(100);
 
-    keyboard.style.height = `18${unit}`;
+    keyboard.style.height = flipDependentLength(18);
 
     for (const key of keyboardKeys) {
-        key.style.borderWidth = `0.2${unit}`;
-        key.style.borderRadius = `1${unit}`;
+        key.style.borderWidth = flipDependentLength(0.2);
+        key.style.borderRadius = flipDependentLength(1);
     };
 
-    panel.style.marginTop = `2${unit}`;
+    panel.style.marginTop = flipDependentLength(2);
 
-    harmDirectionButton.style.width = `14${unit}`;
-    brightButton.style.fontSize = `1.8${unit}`;
-    darkButton.style.fontSize = `1.8${unit}`;
-    brightButton.style.padding = `1${unit} 0`;
-    darkButton.style.padding = `1${unit} 0`;
-    brightButton.style.borderRadius = `2${unit} 0 0 0`;
-    darkButton.style.borderRadius = `0 0 2${unit} 0`;
+    harmDirectionButton.style.width = flipDependentLength(14);
+    brightButton.style.fontSize = darkButton.style.fontSize = flipDependentLength(1.8);
+    brightButton.style.padding = darkButton.style.padding = `${flipDependentLength(1)} 0`;
+    brightButton.style.borderRadius = `${flipDependentLength(2)} 0 0 0`;
+    darkButton.style.borderRadius = `0 0 ${flipDependentLength(2)} 0`;
 
-    chordSymbolA.style.fontSize = `6${unit}`;
-    chordSymbolB.style.fontSize = `4.5${unit}`;
-    chordSymbolC.style.fontSize = `3${unit}`;
+    chordSymbolA.style.fontSize = flipDependentLength(6);
+    chordSymbolB.style.fontSize = flipDependentLength(4.5);
+    chordSymbolC.style.fontSize = flipDependentLength(3);
 
-    rotateButton.style.height = `5${unit}`;
+    rotateButton.style.height = flipDependentLength(5);
+};
+
+function flipDependentLength(percentNum) {
+    if (stateFlipped) {
+        return `${percentNum}dvh`;
+    } else {
+        return `${percentNum}vw`;
+    };
 };
 
 function mouseEnterTriggerableKey (event) {
