@@ -2,7 +2,7 @@ from flask import Flask, Response, render_template, request, url_for, redirect
 from admin import admin_alert_thread
 
 
-# Copyright 2021 Johnathan Pennington | All rights reserved.
+copyright_notice = '(c) 2022 Johnathan Pennington | All rights reserved.'
 
 
 app = Flask(__name__)
@@ -43,7 +43,7 @@ def page_not_found(e):
                        f'Rendered page_not_found.html and suggested: \n{site_root}{rel_path}'
         admin_alert_thread('Web App - 404', message_body)
 
-    return render_template('page_not_found.html', relpath=rel_path, a_text=a_text), 404
+    return render_template('page_not_found.html', relpath=rel_path, a_text=a_text, copyright_notice=copyright_notice), 404
 
 
 @app.route('/serverterminal', methods=['POST'])
@@ -73,7 +73,7 @@ def favicon():
 
 @app.route('/')
 def harmonizer():
-    return render_template('harmonizer.html')
+    return render_template('harmonizer.html', copyright_notice=copyright_notice)
 
 
 if __name__ == '__main__':
